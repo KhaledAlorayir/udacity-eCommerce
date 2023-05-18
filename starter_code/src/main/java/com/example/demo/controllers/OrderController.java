@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import java.util.List;
 
+import com.example.demo.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ public class OrderController {
 	
 	@PostMapping("/submit/{username}")
 	public ResponseEntity<UserOrder> submit(@PathVariable String username) {
-		User user = userRepository.findByUsername(username);
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("user doesn't exist"));
 		if(user == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -42,7 +43,7 @@ public class OrderController {
 	
 	@GetMapping("/history/{username}")
 	public ResponseEntity<List<UserOrder>> getOrdersForUser(@PathVariable String username) {
-		User user = userRepository.findByUsername(username);
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("user doesn't exist"));
 		if(user == null) {
 			return ResponseEntity.notFound().build();
 		}
