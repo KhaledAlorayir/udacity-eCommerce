@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.dto.GetUserResponse;
+import com.example.demo.security.Authenticated;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +53,12 @@ public class UserController {
             throw new BadRequestException("passwords don't match");
         }
         return ResponseEntity.ok(new GetUserResponse(userRepository.save(new User(createUserRequest.getUsername(),passwordEncoder.encode(createUserRequest.getPassword()),new Cart()))));
+    }
+
+    @GetMapping("/secret")
+    public ResponseEntity<String> secret() {
+        System.out.println(Authenticated.getUserId());
+        return ResponseEntity.ok("hello world");
     }
 
 
