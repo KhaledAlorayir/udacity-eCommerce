@@ -26,6 +26,7 @@ public class AuthMiddlewareHandler extends BasicAuthenticationFilter {
 
         if(token == null || !token.startsWith(Constants.TOKEN_PREFIX)) {
             chain.doFilter(request,response);
+            return;
         }
         String userId = JWT.require(HMAC512(Constants.SECRET.getBytes())).build()
                         .verify(token.replace(Constants.TOKEN_PREFIX,""))

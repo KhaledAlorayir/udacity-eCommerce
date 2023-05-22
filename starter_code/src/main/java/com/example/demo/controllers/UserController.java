@@ -5,6 +5,8 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.dto.GetUserResponse;
 import com.example.demo.security.Authenticated;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +30,7 @@ import javax.validation.Valid;
 @RequestMapping("/api/users")
 public class UserController {
 
-
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
@@ -52,14 +54,7 @@ public class UserController {
         if(!createUserRequest.getPassword().equals(createUserRequest.getConfirmedPassword())) {
             throw new BadRequestException("passwords don't match");
         }
+        log.info("new user has been created!",createUserRequest.getUsername());
         return ResponseEntity.ok(new GetUserResponse(userRepository.save(new User(createUserRequest.getUsername(),passwordEncoder.encode(createUserRequest.getPassword()),new Cart()))));
     }
-
-    @GetMapping("/secret")
-    public ResponseEntity<String> secret() {
-        System.out.println(Authenticated.getUserId());
-        return ResponseEntity.ok("hello world");
-    }
-
-
 }
