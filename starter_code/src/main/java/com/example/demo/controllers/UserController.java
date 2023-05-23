@@ -42,12 +42,12 @@ public class UserController {
 
 	@GetMapping("/username/{username}")
 	public ResponseEntity<GetUserResponse> findByUserName(@Valid @PathVariable String username) {
-		return ResponseEntity.ok(new GetUserResponse(userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("user doesn't exist"))));
+		return ResponseEntity.ok(new GetUserResponse(userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("user doesn't exist"))));
 	}
 
     @PostMapping
     public ResponseEntity<GetUserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
-        userRepository.findByUsername(createUserRequest.getUsername()).ifPresent(user -> {
+        userRepository.findByUsernameIgnoreCase(createUserRequest.getUsername()).ifPresent(user -> {
             throw new BadRequestException("username exists");
         });
 

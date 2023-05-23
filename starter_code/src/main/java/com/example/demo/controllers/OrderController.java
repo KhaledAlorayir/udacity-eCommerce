@@ -1,8 +1,12 @@
 package com.example.demo.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.model.dto.GetCartResponse;
+import com.example.demo.security.Authenticated;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,34 +23,32 @@ import com.example.demo.model.persistence.repositories.OrderRepository;
 import com.example.demo.model.persistence.repositories.UserRepository;
 
 @RestController
-@RequestMapping("/api/order")
+@RequiredArgsConstructor
+@RequestMapping("/api/orders")
 public class OrderController {
 	
-	
-	@Autowired
-	private UserRepository userRepository;
-	
-	@Autowired
-	private OrderRepository orderRepository;
+
+	private final UserRepository userRepository;
+	private final OrderRepository orderRepository;
 	
 	
-	@PostMapping("/submit/{username}")
-	public ResponseEntity<UserOrder> submit(@PathVariable String username) {
-		User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("user doesn't exist"));
+	@PostMapping("/submit")
+	public ResponseEntity<GetCartResponse> submit() {
+		User user = userRepository.findById(Authenticated.getUserId()).orElseThrow(() -> new NotFoundException("user doesn't exist"));
 		if(user == null) {
 			return ResponseEntity.notFound().build();
 		}
 		UserOrder order = UserOrder.createFromCart(user.getCart());
 		orderRepository.save(order);
-		return ResponseEntity.ok(order);
+		return ResponseEntity.ok(new GetCartResponse(order));
 	}
 	
-	@GetMapping("/history/{username}")
-	public ResponseEntity<List<UserOrder>> getOrdersForUser(@PathVariable String username) {
-		User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("user doesn't exist"));
+	@GetMapping("/history")
+	public ResponseEntity<List<GetCartResponse>> getOrdersForUser() {
+		User user = userRepository.findById(Authenticated.getUserId()).orElseThrow(() -> new NotFoundException("user doesn't exist"));
 		if(user == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(orderRepository.findByUser(user));
+		return ResponseEntity.ok(orderRepository.findByUser(user).stream().map(order -> new GetCartResponse(order)).collect(Collectors.toList()));
 	}
 }
