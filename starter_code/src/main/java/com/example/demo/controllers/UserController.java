@@ -4,10 +4,12 @@ import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.dto.GetUserResponse;
 import com.example.demo.security.Authenticated;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,13 +28,14 @@ import com.example.demo.model.dto.CreateUserRequest;
 import javax.validation.Valid;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/{id}")
     public ResponseEntity<GetUserResponse> findById(@Valid @PathVariable Long id) {
@@ -57,6 +60,6 @@ public class UserController {
         }
         GetUserResponse user = new GetUserResponse(userRepository.save(new User(createUserRequest.getUsername(),passwordEncoder.encode(createUserRequest.getPassword()),new Cart())));
         log.info("create user success",user.getId());
-        return ResponseEntity.ok(user);
+        return new ResponseEntity<>(user,HttpStatus.CREATED);
     }
 }
