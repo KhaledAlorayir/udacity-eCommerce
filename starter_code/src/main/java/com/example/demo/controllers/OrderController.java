@@ -7,7 +7,10 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.dto.GetCartResponse;
 import com.example.demo.security.Authenticated;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,29 +29,39 @@ import com.example.demo.model.persistence.repositories.UserRepository;
 @RequiredArgsConstructor
 @RequestMapping("/api/orders")
 public class OrderController {
-	
 
-	private final UserRepository userRepository;
-	private final OrderRepository orderRepository;
-	
-	
-	@PostMapping("/submit")
-	public ResponseEntity<GetCartResponse> submit() {
-		User user = userRepository.findById(Authenticated.getUserId()).orElseThrow(() -> new NotFoundException("user doesn't exist"));
-		if(user == null) {
-			return ResponseEntity.notFound().build();
-		}
-		UserOrder order = UserOrder.createFromCart(user.getCart());
-		orderRepository.save(order);
-		return ResponseEntity.ok(new GetCartResponse(order));
-	}
-	
-	@GetMapping("/history")
-	public ResponseEntity<List<GetCartResponse>> getOrdersForUser() {
-		User user = userRepository.findById(Authenticated.getUserId()).orElseThrow(() -> new NotFoundException("user doesn't exist"));
-		if(user == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(orderRepository.findByUser(user).stream().map(order -> new GetCartResponse(order)).collect(Collectors.toList()));
-	}
+
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final static Logger log = LoggerFactory.getLogger(OrderController.class);
+
+    @PostMapping("/submit")
+    public ResponseEntity<GetCartResponse> submit() {
+        try {
+            User user = userRepository.findById(Authenticated.getUserId()).orElseThrow(() -> new NotFoundException("user doesn't exist"));
+            UserOrder order = UserOrder.createFromCart(user.getCart());
+            orderRepository.save(order);
+            log.info("submit order success", order.getId());
+            return ResponseEntity.ok(new GetCartResponse(order));
+
+        } catch (NotFoundException exception) {
+            log.error("submit order error", exception.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<GetCartResponse>> getOrdersForUser() {
+        try {
+            User user = userRepository.findById(Authenticated.getUserId()).orElseThrow(() -> new NotFoundException("user doesn't exist"));
+			log.info("order history success", user.getId());
+			return ResponseEntity.ok(orderRepository.findByUser(user).stream().map(order -> new GetCartResponse(order)).collect(Collectors.toList()));
+		} catch (NotFoundException exception) {
+            log.error("order history error", exception.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+    }
 }

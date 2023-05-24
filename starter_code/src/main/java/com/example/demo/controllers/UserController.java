@@ -32,7 +32,6 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserRepository userRepository;
-    private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/{id}")
@@ -48,13 +47,16 @@ public class UserController {
     @PostMapping
     public ResponseEntity<GetUserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         userRepository.findByUsernameIgnoreCase(createUserRequest.getUsername()).ifPresent(user -> {
+            log.error("create user error: username exists",createUserRequest.getUsername());
             throw new BadRequestException("username exists");
         });
 
         if(!createUserRequest.getPassword().equals(createUserRequest.getConfirmedPassword())) {
+            log.error("create user error: passwords don't match",createUserRequest.getPassword(),createUserRequest.getConfirmedPassword());
             throw new BadRequestException("passwords don't match");
         }
-        log.info("new user has been created!",createUserRequest.getUsername());
-        return ResponseEntity.ok(new GetUserResponse(userRepository.save(new User(createUserRequest.getUsername(),passwordEncoder.encode(createUserRequest.getPassword()),new Cart()))));
+        GetUserResponse user = new GetUserResponse(userRepository.save(new User(createUserRequest.getUsername(),passwordEncoder.encode(createUserRequest.getPassword()),new Cart())));
+        log.info("create user success",user.getId());
+        return ResponseEntity.ok(user);
     }
 }
