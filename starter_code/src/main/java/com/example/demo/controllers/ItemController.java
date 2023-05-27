@@ -15,9 +15,9 @@ import com.example.demo.model.persistence.repositories.ItemRepository;
 
 @RestController
 @RequestMapping("/api/items")
-@RequiredArgsConstructor
 public class ItemController {
-	private final ItemRepository itemRepository;
+	@Autowired
+	private ItemRepository itemRepository;
 	
 	@GetMapping
 	public ResponseEntity<List<Item>> getItems() {

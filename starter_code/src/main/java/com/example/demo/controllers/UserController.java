@@ -36,6 +36,8 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CartRepository cartRepository;
 
     @GetMapping("/{id}")
     public ResponseEntity<GetUserResponse> findById(@Valid @PathVariable Long id) {
@@ -58,8 +60,16 @@ public class UserController {
             log.error("create user error: passwords don't match",createUserRequest.getPassword(),createUserRequest.getConfirmedPassword());
             throw new BadRequestException("passwords don't match");
         }
-        GetUserResponse user = new GetUserResponse(userRepository.save(new User(createUserRequest.getUsername(),passwordEncoder.encode(createUserRequest.getPassword()),new Cart())));
+        User user = new User();
+        user.setUsername(createUserRequest.getUsername());
+        user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+        Cart cart = new Cart();
+        user.setCart(cart);
+        userRepository.save(user);
+        cart.setUser(user);
+        cartRepository.save(cart);
+
         log.info("create user success",user.getId());
-        return new ResponseEntity<>(user,HttpStatus.CREATED);
+        return new ResponseEntity<>(new GetUserResponse(user),HttpStatus.CREATED);
     }
 }

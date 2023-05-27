@@ -26,13 +26,12 @@ import com.example.demo.model.persistence.repositories.OrderRepository;
 import com.example.demo.model.persistence.repositories.UserRepository;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/orders")
 public class OrderController {
 
 
-    private final UserRepository userRepository;
-    private final OrderRepository orderRepository;
+    private  UserRepository userRepository;
+    private  OrderRepository orderRepository;
     private final static Logger log = LoggerFactory.getLogger(OrderController.class);
 
     @PostMapping("/submit")

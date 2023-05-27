@@ -25,12 +25,11 @@ import com.example.demo.model.dto.ModifyCartRequest;
 
 @RestController
 @RequestMapping("/api/carts")
-@RequiredArgsConstructor
 public class CartController {
 
-	private final UserRepository userRepository;
-	private final CartRepository cartRepository;
-	private final ItemRepository itemRepository;
+	private UserRepository userRepository;
+	private CartRepository cartRepository;
+	private ItemRepository itemRepository;
 	
 	@PostMapping("/addToCart")
 	public ResponseEntity<GetCartResponse> addTocart(@RequestBody ModifyCartRequest request) {
@@ -43,7 +42,6 @@ public class CartController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();
-
 		IntStream.range(0, request.getQuantity())
 			.forEach(i -> cart.addItem(item.get()));
 		cartRepository.save(cart);
