@@ -26,9 +26,11 @@ import com.example.demo.model.dto.ModifyCartRequest;
 @RestController
 @RequestMapping("/api/carts")
 public class CartController {
-
+	@Autowired
 	private UserRepository userRepository;
+	@Autowired
 	private CartRepository cartRepository;
+	@Autowired
 	private ItemRepository itemRepository;
 	
 	@PostMapping("/addToCart")

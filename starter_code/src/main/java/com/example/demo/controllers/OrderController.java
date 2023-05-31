@@ -29,8 +29,9 @@ import com.example.demo.model.persistence.repositories.UserRepository;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-
+    @Autowired
     private  UserRepository userRepository;
+    @Autowired
     private  OrderRepository orderRepository;
     private final static Logger log = LoggerFactory.getLogger(OrderController.class);
 
